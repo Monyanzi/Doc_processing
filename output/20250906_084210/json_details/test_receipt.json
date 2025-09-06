@@ -1,0 +1,22 @@
+{
+  "source_file": "sample-documents-2/test_receipt.txt",
+  "ingestion_method": "text_file",
+  "classification": {
+    "document_type": "receipt",
+    "confidence": 0.98,
+    "method": "rules_filename"
+  },
+  "extraction": {
+    "data": {
+      "status": "failed_llm",
+      "error": "401 Client Error: Unauthorized for url: https://api.openai.com/v1/chat/completions"
+    }
+  },
+  "validation": {
+    "is_valid": false,
+    "errors": [
+      "Extraction failed: 401 Client Error: Unauthorized for url: https://api.openai.com/v1/chat/completions"
+    ],
+    "warnings": []
+  }
+}

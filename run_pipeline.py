@@ -47,7 +47,8 @@ def main():
     parser.add_argument(
         "--input-dir",
         type=Path,
-        help="Override the input directory specified in the config file."
+        action='append', # Allows specifying multiple input directories
+        help="Specify an input directory. Overrides config file. Can be used multiple times."
     )
     parser.add_argument(
         "--output-dir",
@@ -81,19 +82,17 @@ def main():
     logger.info("🚀 Starting Document Intelligence Pipeline...")
     logger.info(f"✅ Configuration loaded from {args.config}")
 
-    # Override config with CLI arguments if provided
-    if args.input_dir:
-        config['input_directory'] = str(args.input_dir)
-    if args.output_dir:
-        config['output_directory'] = str(args.output_dir)
-
     # --- Setup Directories ---
-    input_dir = Path(config.get("input_directory", "sample-documents/"))
-    base_output_dir = Path(config.get("output_directory", "output/"))
+    # Use CLI arguments if provided, otherwise use the config file
+    if args.input_dir:
+        input_dirs = [Path(p) for p in args.input_dir]
+    else:
+        input_dirs = [Path(p) for p in config.get("input_directories", ["sample-documents/"])]
 
-    if not input_dir.exists():
-        logger.error(f"Input directory does not exist: {input_dir}")
-        return
+    if args.output_dir:
+        base_output_dir = Path(args.output_dir)
+    else:
+        base_output_dir = Path(config.get("output_directory", "output/"))
 
     # Create a timestamped directory for this specific run
     run_timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -109,15 +108,21 @@ def main():
     reporter = Reporter(config, run_output_dir)
 
     # --- Run Pipeline Stages ---
+    all_documents = []
     try:
-        # 1. Ingestion
-        documents = ingester.ingest(input_dir)
-        if not documents:
+        # 1. Ingestion from all specified directories
+        for in_dir in input_dirs:
+            if not in_dir.exists():
+                logger.error(f"Input directory does not exist: {in_dir}")
+                continue
+            all_documents.extend(ingester.ingest(in_dir))
+
+        if not all_documents:
             logger.warning("No documents were successfully ingested. Pipeline will stop.")
             return
 
         # 2. Classification
-        classified_docs = classifier.classify_documents(documents)
+        classified_docs = classifier.classify_documents(all_documents)
 
         # 3. Extraction
         extracted_docs = extractor.extract_data(classified_docs)

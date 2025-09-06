@@ -3,9 +3,12 @@
 # =============================================================================
 
 # --- General Settings --------------------------------------------------------
-# Root directory for all inputs. Can be overridden by CLI arguments.
-# All subdirectories in this path will be scanned for documents.
-input_directory: "sample-documents/"
+# A list of input directories to scan for documents.
+# Can be overridden by the --input-dir CLI argument, which can also be specified multiple times.
+input_directories:
+  - "sample-documents/"
+  # - "another-folder/of-docs/"
+  # - "/absolute/path/to/more/docs/"
 
 # Root directory for all outputs.
 output_directory: "output/"
