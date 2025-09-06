@@ -1,0 +1,17 @@
+# Core Pipeline Dependencies
+openai
+ollama
+requests
+pandas
+openpyxl
+python-dotenv
+PyYAML
+
+# Document Processing
+PyMuPDF # For PDF text extraction
+pdf2image # To convert PDFs to images for OCR
+Pillow # For image manipulation, required by pytesseract
+pytesseract # For OCR (Optical Character Recognition)
+
+# Utilities
+rich # For better-formatted console output (mentioned in README)

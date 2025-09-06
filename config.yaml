@@ -1,0 +1,126 @@
+# =============================================================================
+# Document Intelligence Pipeline Configuration
+# =============================================================================
+
+# --- General Settings --------------------------------------------------------
+# Root directory for all inputs. Can be overridden by CLI arguments.
+# All subdirectories in this path will be scanned for documents.
+input_directory: "sample-documents/"
+
+# Root directory for all outputs.
+output_directory: "output/"
+
+# Log level for the console output. Options: DEBUG, INFO, WARNING, ERROR
+log_level: "INFO"
+
+# --- Ingestion Settings ------------------------------------------------------
+ingestion:
+  # Maximum file size in megabytes to process.
+  max_file_size_mb: 50
+
+  # Supported file extensions for document processing.
+  supported_extensions:
+    - ".pdf"
+    - ".png"
+    - ".jpg"
+    - ".jpeg"
+    - ".tiff"
+    - ".bmp"
+    - ".txt"
+
+  # OCR (Optical Character Recognition) settings
+  ocr:
+    # DPI (dots per inch) for rendering PDF pages as images for OCR.
+    resolution_dpi: 300
+    # Path to the Tesseract executable. Set to null or remove if it's in the system's PATH.
+    # Example for Windows: "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+    tesseract_path: null
+
+# --- Classification Settings -------------------------------------------------
+classification:
+  # If rule-based classification confidence is below this threshold, fallback to LLM.
+  confidence_threshold: 0.7
+
+  # Whether to use an LLM as a fallback if rule-based classification fails.
+  use_llm_fallback: true
+
+  # Tier 1: Rules based on filenames.
+  filename_rules:
+    invoice: ["invoice", "inv-"]
+    receipt: ["receipt"]
+    purchase_order: ["purchase-order", "po-"]
+    credit_note: ["credit-note", "credit_note"]
+    bank_statement: ["bank_statement", "bank-statement"]
+    contract: ["contract", "agreement"]
+
+  # Tier 2: Rules based on document content.
+  content_rules:
+    invoice: ["invoice", "bill to", "remittance", "invoice number"]
+    receipt: ["receipt", "cash sale", "payment confirmation"]
+    purchase_order: ["purchase order", "po number", "ship to"]
+    credit_note: ["credit note", "credit memo"]
+    bank_statement: ["bank statement", "account summary", "statement period"]
+    contract: ["agreement", "contract", "parties", "whereas"]
+
+# --- Extraction Settings -----------------------------------------------------
+extraction:
+  # Maximum number of concurrent workers for calling extraction APIs.
+  max_workers: 8
+
+  # Extraction schemas defining the fields for each document type.
+  schemas:
+    invoice:
+      invoice_number: "string"
+      vendor_name: "string"
+      total_amount: "number"
+      due_date: "YYYY-MM-DD"
+      vat_number: "string"
+    receipt:
+      vendor_name: "string"
+      transaction_date: "YYYY-MM-DD"
+      total_amount: "number"
+      payment_method: "string"
+    contract:
+      contract_title: "string"
+      effective_date: "YYYY-MM-DD"
+      termination_date: "YYYY-MM-DD"
+      contracting_parties: ["string"]
+    bank_statement:
+      bank_name: "string"
+      account_holder: "string"
+      statement_period: "string"
+      ending_balance: "number"
+
+  # Regex rules for a first pass extraction before using LLMs.
+  regex_rules:
+    invoice:
+      invoice_number: 'invoice\s*(?:no\.?|number|#)\s*:?\s*([A-Z0-9\-_]+)'
+      due_date: 'due\s*date\s*:?\s*(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})'
+      total_amount: '(?:total|balance)\s*due\s*:?\s*\$?\s*([0-9,]+\.\d{2})'
+    receipt:
+      transaction_date: 'date\s*:?\s*(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})'
+      total_amount: 'total\s*:?\s*\$?\s*([0-9,]+\.\d{2})'
+
+
+# --- LLM Provider Settings ---------------------------------------------------
+# Configure different LLM providers here. The active provider can be selected below.
+llm:
+  # Select the active provider for LLM tasks: "openai" or "ollama"
+  active_provider: "openai"
+
+  # OpenAI API configuration
+  openai:
+    # Model to use for classification and extraction. gpt-4o-mini is a good balance.
+    model: "gpt-4o-mini"
+    # API base URL. Default is for OpenAI, but can be changed for other compatible APIs.
+    base_url: "https://api.openai.com/v1/chat/completions"
+    # API key is loaded from the .env file (OPENAI_API_KEY)
+
+  # Ollama configuration for local models
+  ollama:
+    # Model to use for classification and extraction.
+    model: "gemma3:1b"
+    # Base URL for the Ollama server.
+    base_url: "http://localhost:11434"
+    # Request timeout in seconds.
+    timeout: 120

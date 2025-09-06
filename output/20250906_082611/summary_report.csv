@@ -1,0 +1,2 @@
+source_file,document_type,classification_method,validation_status,validation_errors,error,invoice_number,status
+test_invoice.txt,invoice,rules_filename,invalid,Extraction failed: Requests library not installed.,Requests library not installed.,INV-12345,failed_llm

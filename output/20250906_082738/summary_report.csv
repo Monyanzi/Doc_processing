@@ -1,0 +1,2 @@
+source_file,document_type,classification_method,validation_status,validation_errors,error,invoice_number,status
+test_invoice.txt,invoice,rules_filename,invalid,Extraction failed: 401 Client Error: Unauthorized for url: https://api.openai.com/v1/chat/completions,401 Client Error: Unauthorized for url: https://api.openai.com/v1/chat/completions,INV-12345,failed_llm

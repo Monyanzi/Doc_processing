@@ -1,0 +1,23 @@
+{
+  "source_file": "sample-documents/test_invoice.txt",
+  "ingestion_method": "text_file",
+  "classification": {
+    "document_type": "invoice",
+    "confidence": 0.98,
+    "method": "rules_filename"
+  },
+  "extraction": {
+    "data": {
+      "status": "failed_llm",
+      "error": "401 Client Error: Unauthorized for url: https://api.openai.com/v1/chat/completions",
+      "invoice_number": "INV-12345"
+    }
+  },
+  "validation": {
+    "is_valid": false,
+    "errors": [
+      "Extraction failed: 401 Client Error: Unauthorized for url: https://api.openai.com/v1/chat/completions"
+    ],
+    "warnings": []
+  }
+}
